@@ -14,9 +14,9 @@ CREATE TABLE IF NOT EXISTS users (
 -- Tabla de vuelos
 CREATE TABLE IF NOT EXISTS flights (
     id SERIAL PRIMARY KEY,
-    flight_number VARCHAR(10) UNIQUE NOT NULL,
-    origin VARCHAR(3) NOT NULL,
-    destination VARCHAR(3) NOT NULL,
+    flight_number VARCHAR(50) UNIQUE NOT NULL,   
+    origin VARCHAR(50) NOT NULL,                
+    destination VARCHAR(50) NOT NULL,           
     departure_time TIMESTAMP NOT NULL,
     arrival_time TIMESTAMP NOT NULL,
     price DECIMAL(10, 2) NOT NULL,
@@ -27,6 +27,7 @@ CREATE TABLE IF NOT EXISTS flights (
     CHECK (available_seats >= 0),
     CHECK (available_seats <= total_seats)
 );
+
 
 -- Tabla de pagos
 CREATE TABLE IF NOT EXISTS payments (
