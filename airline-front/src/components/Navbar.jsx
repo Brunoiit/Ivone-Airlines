@@ -1,45 +1,77 @@
-import { useContext } from "react";
-import { AppBar, Toolbar, Button, Typography } from "@mui/material";
-import { Link } from "react-router-dom";
+import { useContext, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import "./Navbar.css";
 
 export default function Navbar() {
   const { user, logout } = useContext(AuthContext);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
-    <AppBar position="static">
-      <Toolbar>
-        <Typography sx={{ flexGrow: 1 }} variant="h6">
+    <nav className="navbar">
+      <div className="navbar-container">
+        <Link to="/" className="navbar-brand">
           Ivone Airlines
-        </Typography>
+        </Link>
 
-        <Button color="inherit" component={Link} to="/">
-          Buscar Vuelos
-        </Button>
+        <button 
+          className="mobile-toggle"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+        >
+          ☰
+        </button>
 
-        {user?.role === "airline" && (
-          <Button color="inherit" component={Link} to="/create-flight">
-            Crear Vuelo
-          </Button>
-        )}
+        <div className={`navbar-menu ${mobileMenuOpen ? 'active' : ''}`}>
+          <Link to="/" className="nav-link" onClick={() => setMobileMenuOpen(false)}>
+            Buscar Vuelos
+          </Link>
 
-        {!user && (
-          <>
-            <Button color="inherit" component={Link} to="/login">
-              Iniciar Sesión
-            </Button>
-            <Button color="inherit" component={Link} to="/register">
-              Registrarse
-            </Button>
-          </>
-        )}
+          {user?.role === "airline" && (
+            <Link to="/create-flight" className="nav-link" onClick={() => setMobileMenuOpen(false)}>
+              Crear Vuelo
+            </Link>
+          )}
 
-        {user && (
-          <Button color="inherit" onClick={logout}>
-            Cerrar Sesión
-          </Button>
-        )}
-      </Toolbar>
-    </AppBar>
+          {user?.role === "customer" && (
+            <>
+              <Link to="/my-bookings" className="nav-link" onClick={() => setMobileMenuOpen(false)}>
+                Mis Reservas
+              </Link>
+              <Link to="/my-payments" className="nav-link" onClick={() => setMobileMenuOpen(false)}>
+                Mis Pagos
+              </Link>
+            </>
+          )}
+
+          {!user && (
+            <>
+              <Link to="/login" className="nav-link" onClick={() => setMobileMenuOpen(false)}>
+                Iniciar Sesión
+              </Link>
+              <Link to="/register" className="nav-link nav-link-primary" onClick={() => setMobileMenuOpen(false)}>
+                Registrarse
+              </Link>
+            </>
+          )}
+
+          {user && (
+            <>
+              <span className="nav-user">
+                👤 {user.full_name}
+              </span>
+              <button onClick={handleLogout} className="nav-logout">
+                Cerrar Sesión
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </nav>
   );
 }

@@ -1,71 +1,93 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { register as registerAPI } from "../api/auth";
-import { Container, TextField, Button, Typography, MenuItem } from "@mui/material";
+import "./Auth.css";
 
 export default function Register() {
+  const navigate = useNavigate();
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("customer");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const submit = async (e) => {
     e.preventDefault();
+    setError("");
+    setLoading(true);
+
     try {
       await registerAPI({ full_name: fullName, email, role, password });
-      alert("Registro exitoso, ahora inicia sesión");
-      window.location.href = "/login";
+      navigate("/login?message=Registro exitoso. Por favor inicia sesión");
     } catch (err) {
-      alert(err?.response?.data?.detail || "Error registrando usuario");
+      setError(err?.response?.data?.detail || "Error registrando usuario");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Container maxWidth="sm">
-      <Typography variant="h4" sx={{ mb: 3 }}>
-        Crear Cuenta
-      </Typography>
+    <div className="auth-container">
+      <div className="auth-card">
+        <div className="auth-header">
+          <h1>Crear Cuenta</h1>
+          <p>Únete a Ivone Airlines hoy</p>
+        </div>
 
-      <form onSubmit={submit}>
-        <TextField
-          fullWidth
-          margin="normal"
-          label="Nombre completo"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-        />
-        <TextField
-          fullWidth
-          margin="normal"
-          label="Correo"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        {error && <div className="error-message">{error}</div>}
 
-        <TextField
-          select
-          fullWidth
-          margin="normal"
-          label="Tipo de usuario"
-          value={role}
-          onChange={(e) => setRole(e.target.value)}
-        >
-          <MenuItem value="customer">Cliente</MenuItem>
-          <MenuItem value="airline">Aerolínea</MenuItem>
-        </TextField>
+        <form onSubmit={submit} className="auth-form">
+          <div className="form-group">
+            <label>Nombre Completo</label>
+            <input
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              required
+              placeholder="Juan Pérez"
+            />
+          </div>
 
-        <TextField
-          fullWidth
-          margin="normal"
-          type="password"
-          label="Contraseña"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <div className="form-group">
+            <label>Correo Electrónico</label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="tu@email.com"
+            />
+          </div>
 
-        <Button variant="contained" type="submit" fullWidth sx={{ mt: 2 }}>
-          Registrarse
-        </Button>
-      </form>
-    </Container>
+          <div className="form-group">
+            <label>Tipo de Usuario</label>
+            <select value={role} onChange={(e) => setRole(e.target.value)}>
+              <option value="customer">Cliente</option>
+              <option value="airline">Aerolínea</option>
+            </select>
+          </div>
+
+          <div className="form-group">
+            <label>Contraseña</label>
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+            />
+          </div>
+
+          <button type="submit" className="submit-button" disabled={loading}>
+            {loading ? "Creando cuenta..." : "Registrarse"}
+          </button>
+        </form>
+
+        <div className="auth-footer">
+          <p>¿Ya tienes cuenta? <a href="/login">Inicia sesión aquí</a></p>
+        </div>
+      </div>
+    </div>
   );
 }

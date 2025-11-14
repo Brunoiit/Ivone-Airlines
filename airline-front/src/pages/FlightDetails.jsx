@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import "./FlightDetails.css";
 
 const FlightDetails = () => {
   const { id } = useParams();
@@ -9,6 +10,8 @@ const FlightDetails = () => {
 
   const [flight, setFlight] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [reserving, setReserving] = useState(false);
 
   useEffect(() => {
     const fetchFlight = async () => {
@@ -16,8 +19,8 @@ const FlightDetails = () => {
         const res = await fetch(`http://localhost:8002/flights/${id}`);
         const data = await res.json();
         setFlight(data);
-      } catch (error) {
-        console.error("Error al obtener vuelo", error);
+      } catch (err) {
+        setError("Error al obtener detalles del vuelo");
       } finally {
         setLoading(false);
       }
@@ -28,11 +31,11 @@ const FlightDetails = () => {
 
   const handleReserve = async () => {
     if (!token) {
-      alert("Debes iniciar sesión para reservar");
       navigate("/login");
       return;
     }
 
+    setReserving(true);
     try {
       const res = await fetch("http://localhost:8003/bookings", {
         method: "POST",
@@ -49,38 +52,99 @@ const FlightDetails = () => {
       const data = await res.json();
 
       if (res.status === 201) {
-        alert("Reserva realizada con éxito");
         navigate(`/payment/${data.booking_id}`);
       } else {
-        alert(data.detail ?? "Error al realizar reserva");
+        setError(data.detail ?? "Error al realizar la reserva");
       }
-    } catch (error) {
-      console.error(error);
-      alert("Error inesperado al reservar");
+    } catch (err) {
+      setError("Error inesperado al reservar");
+    } finally {
+      setReserving(false);
     }
   };
 
-  if (loading) return <p>Cargando...</p>;
-  if (!flight) return <p>No se encontró el vuelo</p>;
+  if (loading) {
+    return (
+      <div className="flight-details-container">
+        <div className="loading">Cargando detalles del vuelo...</div>
+      </div>
+    );
+  }
+
+  if (!flight) {
+    return (
+      <div className="flight-details-container">
+        <div className="empty-state">No se encontró el vuelo solicitado</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container">
-      <h2>Detalles del Vuelo</h2>
-      <p><b>Número:</b> {flight.flight_number}</p>
-      <p><b>Origen:</b> {flight.origin}</p>
-      <p><b>Destino:</b> {flight.destination}</p>
-      <p><b>Salida:</b> {flight.departure_time}</p>
-      <p><b>Llegada:</b> {flight.arrival_time}</p>
-      <p><b>Precio:</b> ${flight.price}</p>
-      <p><b>Sillas disponibles:</b> {flight.available_seats}</p>
+    <div className="flight-details-container">
+      <div className="flight-details-card">
+        <div className="flight-header">
+          <h1>Detalles del Vuelo</h1>
+        </div>
 
-      <button
-        onClick={handleReserve}
-        className="btn btn-primary"
-        disabled={!token}
-      >
-        Reservar
-      </button>
+        {error && <div className="error-message">{error}</div>}
+
+        <div className="flight-info">
+          <div className="info-section">
+            <h3>Información del Vuelo</h3>
+            <div className="info-grid">
+              <div className="info-item">
+                <label>Número de Vuelo</label>
+                <p className="value">{flight.flight_number}</p>
+              </div>
+              <div className="info-item">
+                <label>Ruta</label>
+                <p className="value">{flight.origin} → {flight.destination}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="info-section">
+            <h3>Horarios</h3>
+            <div className="info-grid">
+              <div className="info-item">
+                <label>Salida</label>
+                <p className="value">{new Date(flight.departure_time).toLocaleString('es-ES')}</p>
+              </div>
+              <div className="info-item">
+                <label>Llegada</label>
+                <p className="value">{new Date(flight.arrival_time).toLocaleString('es-ES')}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="info-section">
+            <h3>Disponibilidad y Tarifa</h3>
+            <div className="info-grid">
+              <div className="info-item">
+                <label>Sillas Disponibles</label>
+                <p className="value">{flight.available_seats}</p>
+              </div>
+              <div className="info-item">
+                <label>Precio por Pasajero</label>
+                <p className="value price">${flight.price}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flight-actions">
+          <button
+            onClick={handleReserve}
+            className="reserve-button"
+            disabled={flight.available_seats === 0 || reserving || !token}
+          >
+            {reserving ? "Procesando..." : "Reservar Vuelo"}
+          </button>
+          <button onClick={() => navigate("/")} className="back-button">
+            Volver a Búsqueda
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

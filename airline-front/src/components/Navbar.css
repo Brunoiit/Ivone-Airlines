@@ -1,0 +1,122 @@
+.navbar {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 70px;
+}
+
+.navbar-brand {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  text-decoration: none;
+  transition: opacity 0.3s ease;
+}
+
+.navbar-brand:hover {
+  opacity: 0.9;
+}
+
+.navbar-menu {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+.nav-link {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+  transition: opacity 0.3s ease;
+  font-size: 15px;
+}
+
+.nav-link:hover {
+  opacity: 0.8;
+}
+
+.nav-link-primary {
+  background: white;
+  color: #667eea;
+  padding: 8px 20px;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.nav-link-primary:hover {
+  opacity: 0.95;
+}
+
+.nav-user {
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.nav-logout {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.nav-logout:hover {
+  background: white;
+  color: #667eea;
+}
+
+.mobile-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .mobile-toggle {
+    display: block;
+  }
+
+  .navbar-container {
+    height: auto;
+    padding: 15px 20px;
+  }
+
+  .navbar-menu {
+    display: none;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    padding: 20px 0;
+  }
+
+  .navbar-menu.active {
+    display: flex;
+  }
+
+  .nav-link-primary {
+    width: 100%;
+    text-align: center;
+  }
+
+  .nav-logout {
+    width: 100%;
+  }
+}

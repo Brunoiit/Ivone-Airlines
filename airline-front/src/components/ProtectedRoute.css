@@ -1,0 +1,116 @@
+.access-denied-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.access-denied-card {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  max-width: 500px;
+  width: 100%;
+  overflow: hidden;
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.access-denied-header {
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  padding: 40px 30px;
+  text-align: center;
+}
+
+.access-denied-header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.access-denied-header p {
+  margin: 0;
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+.access-denied-content {
+  padding: 40px 30px;
+  text-align: center;
+}
+
+.denied-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.denied-message {
+  font-size: 16px;
+  color: #333;
+  line-height: 1.6;
+  margin: 0 0 15px 0;
+}
+
+.denied-submessage {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+}
+
+.access-denied-actions {
+  padding: 30px;
+  background: #f8f9fa;
+  text-align: center;
+}
+
+.back-button {
+  display: inline-block;
+  padding: 14px 32px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 8px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.back-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+@media (max-width: 480px) {
+  .access-denied-header {
+    padding: 30px 20px;
+  }
+
+  .access-denied-header h1 {
+    font-size: 24px;
+  }
+
+  .access-denied-content {
+    padding: 30px 20px;
+  }
+
+  .access-denied-actions {
+    padding: 20px;
+  }
+}

@@ -1,0 +1,185 @@
+.flight-details-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40px 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.flight-details-card {
+  max-width: 700px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+  animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.flight-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 40px 30px;
+  text-align: center;
+}
+
+.flight-header h1 {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+.error-message {
+  background: #f8d7da;
+  border-left: 4px solid #dc3545;
+  color: #721c24;
+  padding: 16px 20px;
+  margin: 20px;
+  border-radius: 8px;
+}
+
+.flight-info {
+  padding: 40px 30px;
+}
+
+.info-section {
+  margin-bottom: 30px;
+}
+
+.info-section h3 {
+  font-size: 16px;
+  font-weight: 600;
+  color: #667eea;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin: 0 0 20px 0;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 10px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.info-item label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+}
+
+.info-item .value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+.info-item .price {
+  color: #667eea;
+  font-size: 24px;
+}
+
+.loading,
+.empty-state {
+  padding: 60px 20px;
+  text-align: center;
+  color: white;
+  font-size: 18px;
+  font-weight: 500;
+}
+
+.flight-actions {
+  padding: 30px;
+  background: #f8f9fa;
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+}
+
+.reserve-button,
+.back-button {
+  padding: 14px 32px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.reserve-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  flex: 1;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.reserve-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.reserve-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.back-button {
+  background: white;
+  color: #667eea;
+  border: 2px solid #667eea;
+}
+
+.back-button:hover {
+  background: #f0f0f0;
+}
+
+@media (max-width: 600px) {
+  .flight-details-container {
+    padding: 20px 10px;
+  }
+
+  .flight-header {
+    padding: 30px 20px;
+  }
+
+  .flight-header h1 {
+    font-size: 24px;
+  }
+
+  .flight-info {
+    padding: 25px 20px;
+  }
+
+  .flight-actions {
+    flex-direction: column;
+    padding: 20px;
+  }
+
+  .reserve-button,
+  .back-button {
+    width: 100%;
+  }
+}
