@@ -14,8 +14,8 @@ class Flight(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     flight_number = Column(String, unique=True, nullable=False)
-    origin = Column(String, nullable=False)
-    destination = Column(String, nullable=False)
+    origin = Column(String(50), nullable=False)
+    destination = Column(String(50), nullable=False)
     departure_time = Column(DateTime, nullable=False)
     arrival_time = Column(DateTime, nullable=False)
     price = Column(Numeric(10, 2), nullable=False)

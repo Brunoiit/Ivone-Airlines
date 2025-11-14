@@ -1,4 +1,4 @@
-import { createContext, useState, useContext } from 'react';
+import { createContext, useState, useContext, useEffect } from 'react';
 
 export const AuthContext = createContext();
 
@@ -11,47 +11,65 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }) => {
+  const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
-
-  const login = async (email, password) => {
-    setIsLoading(true);
-    try {
-      const response = await fetch('http://localhost:8001/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password })
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    const userRole = localStorage.getItem('userRole');
+    const userName = localStorage.getItem('userName');
+    
+    if (token && userId) {
+      setIsAuthenticated(true);
+      setUserRole(userRole);
+      setUser({
+        user_id: userId,
+        role: userRole,
+        name: userName
       });
-
-      if (response.ok) {
-        const data = await response.json();
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('userId', data.userId);
-        localStorage.setItem('userRole', data.role);
-        setIsAuthenticated(true);
-        setUserRole(data.role);
-        return { success: true };
-      }
-      return { success: false, error: 'Credenciales inválidas' };
-    } catch (error) {
-      return { success: false, error: error.message };
-    } finally {
-      setIsLoading(false);
     }
+  }, []);
+
+  const login = (userData) => {
+    console.log("[v0] Login called with userData:", userData);
+    
+    if (userData && userData.access_token) {
+      localStorage.setItem('token', userData.access_token);
+      localStorage.setItem('userId', userData.user_id);
+      localStorage.setItem('userRole', userData.role);
+      localStorage.setItem('userName', userData.email || 'User');
+      
+      setUser({
+        user_id: userData.user_id,
+        role: userData.role,
+        name: userData.email,
+        email: userData.email
+      });
+      setIsAuthenticated(true);
+      setUserRole(userData.role);
+      console.log("[v0] Login successful, user:", userData);
+      return { success: true };
+    }
+    console.log("[v0] Login failed - missing access_token");
+    return { success: false, error: 'Invalid user data' };
   };
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
     localStorage.removeItem('userRole');
+    localStorage.removeItem('userName');
+    setUser(null);
     setIsAuthenticated(false);
     setUserRole(null);
   };
 
   return (
     <AuthContext.Provider value={{
+      user,
       isAuthenticated,
       userRole,
       isLoading,

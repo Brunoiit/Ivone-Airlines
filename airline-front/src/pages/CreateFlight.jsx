@@ -139,7 +139,7 @@ const CreateFlight = () => {
                 name="departure_city"
                 value={formData.departure_city}
                 onChange={handleChange}
-                placeholder="Ej: Madrid"
+                placeholder="Ciudad"
                 className={errors.departure_city ? 'error' : ''}
               />
               {errors.departure_city && (
@@ -155,7 +155,7 @@ const CreateFlight = () => {
                 name="arrival_city"
                 value={formData.arrival_city}
                 onChange={handleChange}
-                placeholder="Ej: Barcelona"
+                placeholder="Ciudad"
                 className={errors.arrival_city ? 'error' : ''}
               />
               {errors.arrival_city && (
@@ -194,15 +194,15 @@ const CreateFlight = () => {
             </div>
 
             <div className="form-group">
-              <label htmlFor="price">Precio (USD) *</label>
+              <label htmlFor="price">Precio (COP) *</label>
               <input
                 type="number"
                 id="price"
                 name="price"
                 value={formData.price}
                 onChange={handleChange}
-                placeholder="0.00"
-                step="0.01"
+                placeholder="0"
+                step="100"
                 min="0"
                 className={errors.price ? 'error' : ''}
               />
@@ -219,7 +219,7 @@ const CreateFlight = () => {
                 name="available_seats"
                 value={formData.available_seats}
                 onChange={handleChange}
-                placeholder="150"
+                placeholder="Asientos disponibles"
                 min="1"
                 className={errors.available_seats ? 'error' : ''}
               />

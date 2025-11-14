@@ -19,10 +19,12 @@ export default function Login() {
 
     try {
       const res = await loginAPI({ email, password });
-      login(res.data);
+      console.log("[v0] Login response:", res);
+      login(res);
       navigate("/");
     } catch (err) {
-      setError(err?.response?.data?.detail || "Credenciales inválidas");
+      console.log("[v0] Login error:", err);
+      setError(err?.detail || err?.message || "Credenciales inválidas");
     } finally {
       setLoading(false);
     }
