@@ -7,6 +7,7 @@ from typing import Optional, List
 from models import Flight, get_db
 import requests
 import uvicorn
+import random
 
 app = FastAPI(title="Flights Service", version="1.0.0")
 
@@ -119,7 +120,7 @@ def create_flight(
     
     # Crear vuelo
     new_flight = Flight(
-        flight_number=flight_data.flight_number,
+        flight_number = f"FL-{random.randint(1000, 9999)}",
         origin=flight_data.origin.upper(),
         destination=flight_data.destination.upper(),
         departure_time=flight_data.departure_time,

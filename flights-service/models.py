@@ -13,7 +13,7 @@ class Flight(Base):
     __tablename__ = "flights"
     
     id = Column(Integer, primary_key=True, index=True)
-    flight_number = Column(String, unique=True, nullable=False)
+    flight_number = Column(String(20), unique=True, nullable=False)
     origin = Column(String(50), nullable=False)
     destination = Column(String(50), nullable=False)
     departure_time = Column(DateTime, nullable=False)
