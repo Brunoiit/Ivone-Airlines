@@ -1,49 +1,88 @@
+import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axios from "axios";
 import { useAuth } from "../context/AuthContext";
 
-export default function FlightDetails() {
-  const { id } = useParams();
+const FlightDetails = () => {
+  const { id } = useParams();                   // <-- aquí obtiene el ID del vuelo desde la URL
   const navigate = useNavigate();
   const { token, user } = useAuth();
+
   const [flight, setFlight] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    axios.get(`http://localhost:8002/flights/${id}`)
-      .then(res => setFlight(res.data));
-  }, []);
+    const fetchFlight = async () => {
+      try {
+        const res = await fetch(`http://localhost:8002/flights/${id}`);
+        const data = await res.json();
+        setFlight(data);
+      } catch (error) {
+        console.error("Error al obtener vuelo", error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const reserve = async () => {
+    fetchFlight();
+  }, [id]);
+
+  const handleReserve = async () => {
+    if (!token) {
+      alert("Debes iniciar sesión para reservar");
+      navigate("/login");
+      return;
+    }
+
     try {
-      const res = await axios.post(
-        "http://localhost:8003/bookings",
-        {
-          flight_id: id,
-          user_id: user.user_id,
-          passenger_name: user.full_name,
-          passenger_document: "CC123456789",
-          seat_number: "12A"
+      const res = await fetch("http://localhost:8003/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      navigate(`/payment/${res.data.id}`);
-    } catch {
-      alert("Error al reservar");
+        body: JSON.stringify({
+          user_id: user.user_id,
+          flight_id: Number(id),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (res.status === 201) {
+        alert("Reserva realizada con éxito");
+        navigate(`/payment/${data.booking_id}`);
+      } else {
+        alert(data.detail ?? "Error al realizar reserva");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("Error inesperado al reservar");
     }
   };
 
-  if (!flight) return <p>Cargando...</p>;
+  if (loading) return <p>Cargando...</p>;
+  if (!flight) return <p>No se encontró el vuelo</p>;
 
   return (
-    <div>
-      <h2>Vuelo {flight.flight_number}</h2>
-      <p>{flight.origin} → {flight.destination}</p>
-      <p>Precio: ${flight.price}</p>
+    <div className="container">
+      <h2>Detalles del Vuelo</h2>
+      <p><b>Número:</b> {flight.flight_number}</p>
+      <p><b>Origen:</b> {flight.origin}</p>
+      <p><b>Destino:</b> {flight.destination}</p>
+      <p><b>Salida:</b> {flight.departure_time}</p>
+      <p><b>Llegada:</b> {flight.arrival_time}</p>
+      <p><b>Precio:</b> ${flight.price}</p>
+      <p><b>Sillas disponibles:</b> {flight.available_seats}</p>
 
-      {user?.role === "customer" && (
-        <button onClick={reserve}>Reservar asiento</button>
-      )}
+      <button
+        onClick={handleReserve}
+        className="btn btn-primary"
+        disabled={!token}
+      >
+        Reservar
+      </button>
     </div>
   );
-}
+};
+
+export default FlightDetails;

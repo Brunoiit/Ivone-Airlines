@@ -1,40 +1,55 @@
-import { createContext, useState } from "react";
+import { createContext, useState } from 'react';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(localStorage.getItem("token") || "");
-  const [user, setUser] = useState(
-    JSON.parse(localStorage.getItem("user") || "null")
-  );
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userRole, setUserRole] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const login = (authData) => {
-    setToken(authData.access_token);
-    setUser({
-      id: authData.user_id,
-      role: authData.role,
-      email: authData.email,
-    });
 
-    localStorage.setItem("token", authData.access_token);
-    localStorage.setItem(
-      "user",
-      JSON.stringify({
-        id: authData.user_id,
-        role: authData.role,
-        email: authData.email,
-      })
-    );
+  const login = async (email, password) => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('http://localhost:8001/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('userId', data.userId);
+        localStorage.setItem('userRole', data.role);
+        setIsAuthenticated(true);
+        setUserRole(data.role);
+        return { success: true };
+      }
+      return { success: false, error: 'Credenciales inválidas' };
+    } catch (error) {
+      return { success: false, error: error.message };
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = () => {
-    setToken("");
-    setUser(null);
-    localStorage.clear();
+    localStorage.removeItem('token');
+    localStorage.removeItem('userId');
+    localStorage.removeItem('userRole');
+    setIsAuthenticated(false);
+    setUserRole(null);
   };
 
   return (
-    <AuthContext.Provider value={{ token, user, login, logout }}>
+    <AuthContext.Provider value={{
+      isAuthenticated,
+      userRole,
+      isLoading,
+      login,
+      logout
+    }}>
       {children}
     </AuthContext.Provider>
   );
