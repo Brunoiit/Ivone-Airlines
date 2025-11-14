@@ -10,6 +10,7 @@ import Ticket from "./pages/Ticket";
 import MyBookings from "./pages/MyBookings";
 import MyPayments from "./pages/MyPayments";
 import ProtectedRoute from "./components/ProtectedRoute";
+import BookingDetails from "./pages/BookingDetails";
 
 import Navbar from "./components/Navbar";
 import Login from "./pages/Login";
@@ -78,6 +79,14 @@ function App() {
             element={
               <ProtectedRoute requiredRole="customer">
                 <MyPayments />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/booking/:id" 
+            element={
+              <ProtectedRoute requiredRole="customer">
+                <BookingDetails />
               </ProtectedRoute>
             } 
           />

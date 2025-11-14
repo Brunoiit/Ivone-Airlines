@@ -74,14 +74,14 @@
 
 .access-denied-actions {
   padding: 30px;
-  background: #f8f9fa;
+  background: white;
   text-align: center;
 }
 
 .back-button {
   display: inline-block;
   padding: 14px 32px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
   color: white;
   text-decoration: none;
   border-radius: 8px;

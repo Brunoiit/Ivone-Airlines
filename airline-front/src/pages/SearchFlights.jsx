@@ -88,7 +88,7 @@ const SearchFlights = () => {
               name="departure_city"
               value={searchParams.departure_city}
               onChange={handleSearchChange}
-              placeholder="Ej: Madrid"
+              placeholder="Ciudad de Origen"
             />
           </div>
 
@@ -100,7 +100,7 @@ const SearchFlights = () => {
               name="arrival_city"
               value={searchParams.arrival_city}
               onChange={handleSearchChange}
-              placeholder="Ej: Barcelona"
+              placeholder="Ciudad Destino"
             />
           </div>
 
