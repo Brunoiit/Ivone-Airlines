@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
 const FlightDetails = () => {
-  const { id } = useParams();                   // <-- aquí obtiene el ID del vuelo desde la URL
+  const { id } = useParams();
   const navigate = useNavigate();
   const { token, user } = useAuth();
 

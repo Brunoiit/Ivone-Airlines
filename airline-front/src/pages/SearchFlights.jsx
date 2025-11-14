@@ -13,7 +13,6 @@ const SearchFlights = () => {
   const [error, setError] = useState('');
   const [hasSearched, setHasSearched] = useState(false);
 
-
   const handleSearchChange = (e) => {
     const { name, value } = e.target;
     setSearchParams(prev => ({
@@ -130,7 +129,7 @@ const SearchFlights = () => {
 
       {hasSearched && flights.length > 0 && (
         <div className="results-container">
-          <h2>✈️ Resultados ({flights.length} vuelos encontrados)</h2>
+          <h2>Resultados ({flights.length} vuelos encontrados)</h2>
           <div className="flights-grid">
             {flights.map((flight) => (
               <div key={flight.id} className="flight-card">

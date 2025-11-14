@@ -87,7 +87,7 @@ const CreateFlight = () => {
       });
 
       if (response.ok) {
-        setSuccessMessage('Vuelo creado exitosamente ✈️');
+        setSuccessMessage('Vuelo creado exitosamente');
         setFormData({
           departure_city: '',
           arrival_city: '',
@@ -113,7 +113,7 @@ const CreateFlight = () => {
     <div className="create-flight-container">
       <div className="create-flight-card">
         <div className="create-flight-header">
-          <h1>✈️ Crear Nuevo Vuelo</h1>
+          <h1>Crear Nuevo Vuelo</h1>
           <p>Completa los detalles del vuelo que deseas publicar</p>
         </div>
 
