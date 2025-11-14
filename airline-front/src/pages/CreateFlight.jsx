@@ -227,26 +227,6 @@ const CreateFlight = () => {
                 <span className="error-text">{errors.available_seats}</span>
               )}
             </div>
-
-            <div className="form-group">
-              <label htmlFor="aircraft_type">Tipo de Aeronave *</label>
-              <select
-                id="aircraft_type"
-                name="aircraft_type"
-                value={formData.aircraft_type}
-                onChange={handleChange}
-                className={errors.aircraft_type ? 'error' : ''}
-              >
-                <option value="">Selecciona un modelo</option>
-                <option value="Boeing 737">Boeing 737</option>
-                <option value="Airbus A380">Airbus A380</option>
-                <option value="Airbus A320">Airbus A320</option>
-                <option value="Boeing 777">Boeing 777</option>
-              </select>
-              {errors.aircraft_type && (
-                <span className="error-text">{errors.aircraft_type}</span>
-              )}
-            </div>
           </div>
 
           <button
