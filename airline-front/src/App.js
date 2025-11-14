@@ -25,13 +25,62 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/flight/:id" element={<FlightDetails />} />
-          <Route path="/create-flight" element={<CreateFlight />} />
-          <Route path="/payment/:bookingId" element={<ProtectedRoute element={<Payment />} requiredRole="customer" />} />
-          <Route path="/invoice/:paymentId" element={<ProtectedRoute element={<Invoice />} requiredRole="customer" />} />
-          <Route path="/checkin/:bookingId" element={<ProtectedRoute element={<CheckIn />} requiredRole="customer" />} />
-          <Route path="/ticket/:bookingId" element={<ProtectedRoute element={<Ticket />} requiredRole="customer" />} />
-          <Route path="/my-bookings" element={<ProtectedRoute element={<MyBookings />} requiredRole="customer" />} />
-          <Route path="/my-payments" element={<ProtectedRoute element={<MyPayments />} requiredRole="customer" />} />
+          <Route 
+            path="/create-flight" 
+            element={
+              <ProtectedRoute requiredRole="airline">
+                <CreateFlight />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/payment/:bookingId" 
+            element={
+              <ProtectedRoute requiredRole="customer">
+                <Payment />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/invoice/:paymentId" 
+            element={
+              <ProtectedRoute requiredRole="customer">
+                <Invoice />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/checkin/:bookingId" 
+            element={
+              <ProtectedRoute requiredRole="customer">
+                <CheckIn />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/ticket/:bookingId" 
+            element={
+              <ProtectedRoute requiredRole="customer">
+                <Ticket />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/my-bookings" 
+            element={
+              <ProtectedRoute requiredRole="customer">
+                <MyBookings />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/my-payments" 
+            element={
+              <ProtectedRoute requiredRole="customer">
+                <MyPayments />
+              </ProtectedRoute>
+            } 
+          />
         </Routes>
       </BrowserRouter>
     </AuthProvider>
