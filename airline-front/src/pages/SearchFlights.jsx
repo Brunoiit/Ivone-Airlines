@@ -1,11 +1,18 @@
 import { useState, useEffect } from 'react';
 import './SearchFlights.css';
+import numberFormat from 'react-number-format';
 
 const SearchFlights = () => {
   const [searchParams, setSearchParams] = useState({
     departure_city: '',
     arrival_city: '',
     departure_date: ''
+    
+  });
+  const formatter = new Intl.NumberFormat('es-CO', {
+    style: 'currency',
+    currency: 'COP',
+    minimumFractionDigits: 0
   });
 
   const [flights, setFlights] = useState([]);
@@ -35,7 +42,7 @@ const SearchFlights = () => {
 
     try {
       const params = new URLSearchParams({
-        departure_city: searchParams.departure_city,
+        departure_city: searchParams.destination,
         arrival_city: searchParams.arrival_city,
         ...(searchParams.departure_date && { departure_date: searchParams.departure_date })
       });
@@ -71,7 +78,7 @@ const SearchFlights = () => {
     window.location.href = `/booking/${flightId}`;
   };
 
-  return (
+  return ( 
     <div className="search-flights-container">
       <div className="search-header">
         <h1>Buscar Vuelos</h1>
@@ -135,9 +142,9 @@ const SearchFlights = () => {
               <div key={flight.id} className="flight-card">
                 <div className="flight-header">
                   <div className="cities">
-                    <span className="city">{flight.departure_city}</span>
+                    <span className="city">{flight.origin}</span>
                     <span className="arrow">→</span>
-                    <span className="city">{flight.arrival_city}</span>
+                    <span className="city">{flight.destination}</span>
                   </div>
                 </div>
 
@@ -172,7 +179,7 @@ const SearchFlights = () => {
                 <div className="flight-footer">
                   <div className="price">
                     <span className="label">Precio por persona</span>
-                    <span className="amount">${flight.price.toFixed(2)}</span>
+                    <span className="amount">{formatter.format(flight.price)}</span>
                   </div>
                   <button
                     onClick={() => handleBookFlight(flight.id)}

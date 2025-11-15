@@ -105,7 +105,7 @@ def main():
         "destination": "MIA",
         "departure_time": departure.isoformat(),
         "arrival_time": arrival.isoformat(),
-        "price": 450.00,
+        "price": 450000,
         "total_seats": 180,
         "airline_id": airline_id
     }
@@ -121,8 +121,8 @@ def main():
     # 6. BUSCAR VUELOS
     print_section("6. Buscando Vuelos")
     params = {
-        "origin": "BOG",
-        "destination": "MIA",
+        "origin": "BOGOTA",
+        "destination": "MIAMI",
         "date": departure.strftime("%Y-%m-%d")
     }
     response = requests.get(f"{FLIGHTS_URL}/flights/search", params=params)

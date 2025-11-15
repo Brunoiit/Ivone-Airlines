@@ -28,12 +28,12 @@ class FlightCreate(BaseModel):
     destination: str
     departure_time: datetime
     arrival_time: datetime
-    price: float
+    price: int
     total_seats: int
     airline_id: int
 
 class FlightUpdate(BaseModel):
-    price: Optional[float] = None
+    price: Optional[int] = None
     available_seats: Optional[int] = None
 
 class FlightResponse(BaseModel):
@@ -43,7 +43,7 @@ class FlightResponse(BaseModel):
     destination: str
     departure_time: datetime
     arrival_time: datetime
-    price: float
+    price: int
     available_seats: int
     total_seats: int
     airline_id: int
@@ -151,7 +151,7 @@ def search_flights(
     
     if destination:
         query = query.filter(Flight.destination == destination.upper())
-    
+        
     if date:
         try:
             date_obj = datetime.strptime(date, "%Y-%m-%d")
@@ -164,7 +164,7 @@ def search_flights(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Formato de fecha inválido. Use YYYY-MM-DD"
             )
-    
+
     flights = query.filter(Flight.available_seats > 0).all()
     return flights
 

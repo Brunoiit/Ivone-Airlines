@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS flights (
     destination VARCHAR(50) NOT NULL,           
     departure_time TIMESTAMP NOT NULL,
     arrival_time TIMESTAMP NOT NULL,
-    price DECIMAL(10, 2) NOT NULL,
+    price INTEGER NOT NULL,
     available_seats INTEGER NOT NULL,
     total_seats INTEGER NOT NULL,
     airline_id INTEGER REFERENCES users(id) ON DELETE CASCADE,

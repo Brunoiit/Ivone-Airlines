@@ -18,7 +18,7 @@ class Flight(Base):
     destination = Column(String(50), nullable=False)
     departure_time = Column(DateTime, nullable=False)
     arrival_time = Column(DateTime, nullable=False)
-    price = Column(Numeric(10, 2), nullable=False)
+    price = Column(Integer, nullable=False)
     available_seats = Column(Integer, nullable=False)
     total_seats = Column(Integer, nullable=False)
     airline_id = Column(Integer, nullable=False)
