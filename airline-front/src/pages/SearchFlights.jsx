@@ -55,6 +55,7 @@ const SearchFlights = () => {
 
       if (response.ok) {
         const data = await response.json();
+        console.log('Vuelos encontrados:', data);
         setFlights(data);
         if (data.length === 0) {
           setError('No se encontraron vuelos para los criterios especificados');
@@ -156,7 +157,9 @@ const SearchFlights = () => {
                     </div>
                     <div className="duration">
                       <span className="label">Duración</span>
-                      <span className="value">2h 30m</span>
+                      <span className="value">{`${Math.floor((new Date(flight.arrival_time) - new Date(flight.departure_time)) / 3600000)}h ${
+  Math.floor(((new Date(flight.arrival_time) - new Date(flight.departure_time)) / 60000) % 60)
+}m`}</span>
                     </div>
                     <div className="time">
                       <span className="label">Llegada</span>
