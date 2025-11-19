@@ -3,13 +3,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional, List
-from bson import ObjectId
-from models import get_booking_collection, generate_booking_code
 import requests
-import uvicorn
+import random
+import string
+from bson import ObjectId
+
+from models import get_db, Booking, booking_helper
 
 app = FastAPI(title="Bookings Service", version="1.0.0")
 
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -18,17 +21,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-AUTH_SERVICE_URL = "http://localhost:8001"
-FLIGHTS_SERVICE_URL = "http://localhost:8002"
+AUTH_SERVICE_URL = "http://auth-service:8001"
+FLIGHTS_SERVICE_URL = "http://flights-service:8002"
 
-# Modelos Pydantic
+# Schemas de entrada
 class BookingCreate(BaseModel):
     flight_id: int
-    user_id: int
     passenger_name: str
     passenger_document: str
-    seat_number: str
+    seat_number: Optional[str] = None
 
+# Schemas de salida
 class BookingResponse(BaseModel):
     id: str
     booking_code: str
@@ -36,294 +39,146 @@ class BookingResponse(BaseModel):
     user_id: int
     passenger_name: str
     passenger_document: str
-    seat_number: str
+    seat_number: Optional[str]
     status: str
-    created_at: str
-    checked_in_at: Optional[str] = None
+    created_at: datetime
 
-class TicketResponse(BaseModel):
-    booking_code: str
-    passenger_name: str
-    flight_number: str
-    origin: str
-    destination: str
-    departure_time: str
-    seat_number: str
-    status: str
+    class Config:
+        from_attributes = True
 
-# Función para verificar token Para mas placer, claro esta
+
 def verify_token(authorization: str = Header(None)):
     if not authorization:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token no proporcionado"
-        )
-    
+        raise HTTPException(status_code=401, detail="Token no proporcionado")
+
     try:
         token = authorization.replace("Bearer ", "")
         response = requests.get(f"{AUTH_SERVICE_URL}/auth/verify", params={"token": token})
-        
+
         if response.status_code != 200:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token inválido"
-            )
-        
+            raise HTTPException(status_code=401, detail="Token inválido")
+
         return response.json()
     except requests.RequestException:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Servicio de autenticación no disponible"
-        )
+        raise HTTPException(status_code=503, detail="Servicio de autenticación no disponible")
 
-# Endpoints
-@app.get("/")
-def root():
-    return {
-        "service": "Bookings Service",
-        "version": "1.0.0",
-        "status": "running"
-    }
 
-@app.post("/bookings", response_model=BookingResponse, status_code=status.HTTP_201_CREATED)
+def generate_booking_code():
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=8))
+
+
+@app.post("/bookings", response_model=BookingResponse, status_code=201)
 def create_booking(
     booking_data: BookingCreate,
-    user_data: dict = Depends(verify_token)
+    user_data: dict = Depends(verify_token),
+    db = Depends(get_db)
 ):
-    bookings = get_booking_collection()
-    
-    # Verificar que el vuelo existe y tiene asientos disponibles
-    try:
-        flight_response = requests.get(f"{FLIGHTS_SERVICE_URL}/flights/{booking_data.flight_id}")
-        if flight_response.status_code != 200:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Vuelo no encontrado"
-            )
-        
-        flight = flight_response.json()
-        
-        if flight["available_seats"] <= 0:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="No hay asientos disponibles en este vuelo"
-            )
-    except requests.RequestException:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Servicio de vuelos no disponible"
-        )
-    
-    # Verificar que el asiento no esté ocupado
-    existing_booking = bookings.find_one({
-        "flight_id": booking_data.flight_id,
-        "seat_number": booking_data.seat_number,
-        "status": {"$ne": "cancelled"}
-    })
-    
-    if existing_booking:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"El asiento {booking_data.seat_number} ya está reservado"
-        )
-    
-    # Crear reserva
-    booking_code = generate_booking_code()
-    new_booking = {
-        "booking_code": booking_code,
-        "flight_id": booking_data.flight_id,
-        "user_id": booking_data.user_id,
-        "passenger_name": booking_data.passenger_name,
-        "passenger_document": booking_data.passenger_document,
-        "seat_number": booking_data.seat_number,
-        "status": "confirmed",
-        "created_at": datetime.utcnow().isoformat(),
-        "checked_in_at": None
-    }
-    
-    result = bookings.insert_one(new_booking)
-    
-    # Actualizar asientos disponibles en el servicio de vuelos
-    try:
-        requests.put(
-            f"{FLIGHTS_SERVICE_URL}/flights/{booking_data.flight_id}/seats",
-            params={"seats_to_reserve": 1}
-        )
-    except requests.RequestException:
-        # Revertir la reserva si falla la actualización de asientos
-        bookings.delete_one({"_id": result.inserted_id})
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Error al actualizar asientos disponibles"
-        )
-    booking_id = str(result.inserted_id)
+    # Verificar vuelo
+    flight_response = requests.get(f"{FLIGHTS_SERVICE_URL}/flights/{booking_data.flight_id}")
+    if flight_response.status_code != 200:
+        raise HTTPException(status_code=404, detail="El vuelo no existe")
 
-    new_booking["id"] = booking_id
-    new_booking["booking_id"] = booking_id
-    return new_booking
+    flight = flight_response.json()
+
+    # Descontar asiento
+    seat_response = requests.put(
+        f"{FLIGHTS_SERVICE_URL}/flights/{booking_data.flight_id}/seats",
+        params={"seats_to_reserve": 1}
+    )
+
+    if seat_response.status_code != 200:
+        raise HTTPException(status_code=400, detail="No hay asientos disponibles")
+
+    # Crear reserva
+    booking = Booking(
+        user_id=user_data.get("user_id"),
+        flight_id=booking_data.flight_id,
+        passenger_name=booking_data.passenger_name,
+        passenger_document=booking_data.passenger_document,
+        seat_number=booking_data.seat_number,
+        booking_code=generate_booking_code(),
+        status="confirmed"
+    )
+
+    # Insertar en MongoDB
+    result = db.insert_one(booking.to_dict())
+    booking_doc = db.find_one({"_id": result.inserted_id})
+
+    return booking_helper(booking_doc)
+
 
 @app.get("/bookings/{booking_id}", response_model=BookingResponse)
-def get_booking(booking_id: str, user_data: dict = Depends(verify_token)):
-    bookings = get_booking_collection()
-    
-    try:
-        booking = bookings.find_one({"_id": ObjectId(booking_id)})
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="ID de reserva inválido"
-        )
+def get_booking(
+    booking_id: str,
+    user_data: dict = Depends(verify_token),
+    db = Depends(get_db)
+):
+    # Validar ObjectId
+    if not ObjectId.is_valid(booking_id):
+        raise HTTPException(status_code=400, detail="ID de reserva inválido")
+
+    # Buscar en MongoDB
+    booking = db.find_one({"_id": ObjectId(booking_id)})
     
     if not booking:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Reserva no encontrada"
-        )
-    
-    booking["id"] = str(booking["_id"])
-    del booking["_id"]
-    return booking
+        raise HTTPException(status_code=404, detail="Reserva no encontrada")
 
-@app.get("/bookings/user/{user_id}", response_model=List[BookingResponse])
-def get_user_bookings(user_id: int, user_data: dict = Depends(verify_token)):
-    # Verificar que el usuario solo pueda ver sus propias reservas
-    if user_data["user_id"] != user_id and user_data["role"] != "admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="No tiene permisos para ver estas reservas"
-        )
-    
-    bookings = get_booking_collection()
-    user_bookings = list(bookings.find({"user_id": user_id}))
-    
-    for booking in user_bookings:
-        booking["id"] = str(booking["_id"])
-        del booking["_id"]
-    
-    return user_bookings
+    # Verificar que el usuario sea propietario de la reserva
+    if booking.get("user_id") != user_data.get("user_id"):
+        raise HTTPException(status_code=403, detail="No tienes permiso para ver esta reserva")
 
-@app.post("/bookings/{booking_id}/checkin")
-def checkin(booking_id: str, user_data: dict = Depends(verify_token)):
-    bookings = get_booking_collection()
+    return booking_helper(booking)
+
+
+@app.get("/bookings", response_model=List[BookingResponse])
+def list_bookings(
+    user_data: dict = Depends(verify_token),
+    db = Depends(get_db)
+):
+    # Listar todas las reservas del usuario
+    bookings = list(db.find({"user_id": user_data.get("user_id")}))
     
-    try:
-        booking = bookings.find_one({"_id": ObjectId(booking_id)})
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="ID de reserva inválido"
-        )
+    return [booking_helper(booking) for booking in bookings]
+
+
+@app.put("/bookings/{booking_id}/cancel", response_model=BookingResponse)
+def cancel_booking(
+    booking_id: str,
+    user_data: dict = Depends(verify_token),
+    db = Depends(get_db)
+):
+    # Validar ObjectId
+    if not ObjectId.is_valid(booking_id):
+        raise HTTPException(status_code=400, detail="ID de reserva inválido")
+
+    # Buscar en MongoDB
+    booking = db.find_one({"_id": ObjectId(booking_id)})
     
     if not booking:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Reserva no encontrada"
-        )
-    
-    if booking["status"] == "cancelled":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="No se puede hacer check-in de una reserva cancelada"
-        )
-    
-    if booking["status"] == "checked_in":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Ya se realizó el check-in para esta reserva"
-        )
-    
-    # Realizar check-in
-    bookings.update_one(
-        {"_id": ObjectId(booking_id)},
-        {
-            "$set": {
-                "status": "checked_in",
-                "checked_in_at": datetime.utcnow().isoformat()
-            }
-        }
-    )
-    
-    return {"message": "Check-in realizado exitosamente", "booking_id": booking_id}
+        raise HTTPException(status_code=404, detail="Reserva no encontrada")
 
-@app.get("/bookings/{booking_id}/ticket", response_model=TicketResponse)
-def get_ticket(booking_id: str, user_data: dict = Depends(verify_token)):
-    bookings = get_booking_collection()
-    
-    try:
-        booking = bookings.find_one({"_id": ObjectId(booking_id)})
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="ID de reserva inválido"
-        )
-    
-    if not booking:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Reserva no encontrada"
-        )
-    
-    # Obtener información del vuelo
-    try:
-        flight_response = requests.get(f"{FLIGHTS_SERVICE_URL}/flights/{booking['flight_id']}")
-        if flight_response.status_code != 200:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Vuelo no encontrado"
-            )
-        
-        flight = flight_response.json()
-    except requests.RequestException:
-        raise HTTPException(
-            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail="Servicio de vuelos no disponible"
-        )
-    
-    ticket = {
-        "booking_code": booking["booking_code"],
-        "passenger_name": booking["passenger_name"],
-        "flight_number": flight["flight_number"],
-        "origin": flight["origin"],
-        "destination": flight["destination"],
-        "departure_time": flight["departure_time"],
-        "seat_number": booking["seat_number"],
-        "status": booking["status"]
-    }
-    
-    return ticket
+    # Verificar que el usuario sea propietario
+    if booking.get("user_id") != user_data.get("user_id"):
+        raise HTTPException(status_code=403, detail="No tienes permiso para cancelar esta reserva")
 
-@app.delete("/bookings/{booking_id}")
-def cancel_booking(booking_id: str, user_data: dict = Depends(verify_token)):
-    bookings = get_booking_collection()
-    
-    try:
-        booking = bookings.find_one({"_id": ObjectId(booking_id)})
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="ID de reserva inválido"
-        )
-    
-    if not booking:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Reserva no encontrada"
-        )
-    
-    if booking["status"] == "cancelled":
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="La reserva ya está cancelada"
-        )
-    
-    # Cancelar reserva
-    bookings.update_one(
+    # Actualizar estado a cancelada
+    db.update_one(
         {"_id": ObjectId(booking_id)},
         {"$set": {"status": "cancelled"}}
     )
-    
-    return {"message": "Reserva cancelada exitosamente"}
 
-if __name__ == "__main__":
-    print("Iniciando Bookings Service en http://localhost:8003")
-    uvicorn.run(app, host="0.0.0.0", port=8003)
+    # Liberar asiento
+    requests.put(
+        f"{FLIGHTS_SERVICE_URL}/flights/{booking.get('flight_id')}/seats",
+        params={"seats_to_release": 1}
+    )
+
+    # Obtener la reserva actualizada
+    updated_booking = db.find_one({"_id": ObjectId(booking_id)})
+
+    return booking_helper(updated_booking)
+
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok", "service": "bookings-service"}

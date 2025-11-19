@@ -34,11 +34,11 @@ cd Airline
 docker-compose up -d
 docker ps
 
-### Paso 3: Inicializar la Base de Datos PostgreSQL
+### Paso 3: Inicializar la Base de Datos PostgreSQL (en caso de emergencia, esto es automatico)
 cat init-db.sql | docker exec -i postgres-db psql -U admin -d flight_system
 docker exec -it postgres-db psql -U admin -d flight_system -c "\dt"
 
-### Paso 4: Instalar Dependencias de Python
+### Paso 4: Instalar Dependencias de Python (en caso de emergencia, esto es automatico)
 python3 -m venv venv
 source venv/bin/activate
 
@@ -47,7 +47,7 @@ pip install -r flights-service/requirements.txt
 pip install -r bookings-service/requirements.txt
 pip install -r payments-service/requirements.txt
 
-### Paso 5: Iniciar los Microservicios (Caso de emergencia)
+### Paso 5: Iniciar los Microservicios (en caso de emergencia, esto es automatico)
 # Terminal 1
 cd auth-service
 python app.py

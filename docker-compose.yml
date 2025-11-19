@@ -44,10 +44,12 @@ services:
   flights-service:
     build:
       context: ./flights-service
+      dockerfile: Dockerfile
     container_name: flights-service
     restart: always
     depends_on:
-      - postgres-db
+      postgres-db:
+        condition: service_healthy
     environment:
       DATABASE_URL: postgresql://admin:admin123@postgres-db:5432/airlinedb
     ports:

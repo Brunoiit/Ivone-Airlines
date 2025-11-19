@@ -10,6 +10,8 @@ import uvicorn
 import random
 
 app = FastAPI(title="Flights Service", version="1.0.0")
+from models import Flight, get_db, Base, engine
+Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
