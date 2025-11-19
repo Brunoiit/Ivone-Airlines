@@ -9,7 +9,6 @@ const CreateFlight = () => {
     arrival_time: '',
     price: '',
     available_seats: '',
-    aircraft_type: ''
   });
 
   const [errors, setErrors] = useState({});
@@ -25,7 +24,6 @@ const CreateFlight = () => {
     if (!formData.arrival_time) newErrors.arrival_time = 'La hora de llegada es requerida';
     if (!formData.price || parseFloat(formData.price) <= 0) newErrors.price = 'El precio debe ser mayor a 0';
     if (!formData.available_seats || parseInt(formData.available_seats) <= 0) newErrors.available_seats = 'Los asientos disponibles deben ser mayor a 0';
-    if (!formData.aircraft_type.trim()) newErrors.aircraft_type = 'El tipo de aeronave es requerido';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -61,7 +59,7 @@ const CreateFlight = () => {
         airline_id: airlineId
       };
 
-      console.log("📌 Enviando:", payload);
+      console.log("[v0] Payload enviado:", payload);
 
       const response = await fetch('http://localhost:8002/flights', {
         method: 'POST',
@@ -72,6 +70,10 @@ const CreateFlight = () => {
         body: JSON.stringify(payload)
       });
 
+      const responseData = await response.json();
+      console.log("[v0] Response status:", response.status);
+      console.log("[v0] Response data:", responseData);
+
       if (response.ok) {
         setSuccessMessage('Vuelo creado exitosamente');
         setFormData({
@@ -80,15 +82,14 @@ const CreateFlight = () => {
           departure_time: '',
           arrival_time: '',
           price: '',
-          available_seats: '',
-          aircraft_type: ''
+          available_seats: ''
         });
         setTimeout(() => setSuccessMessage(''), 3000);
       } else {
-        const error = await response.json();
-        setErrors({ submit: error.message || 'Error al crear el vuelo' });
+        setErrors({ submit: responseData.detail || responseData.message || 'Error al crear el vuelo' });
       }
     } catch (err) {
+      console.error("[v0] Error:", err);
       setErrors({ submit: err.message });
     } finally {
       setIsSubmitting(false);
@@ -142,27 +143,6 @@ const CreateFlight = () => {
               <label htmlFor="available_seats">Asientos Disponibles *</label>
               <input type="number" id="available_seats" name="available_seats" value={formData.available_seats} onChange={handleChange} placeholder="Asientos disponibles" min="1" className={errors.available_seats ? 'error' : ''} />
               {errors.available_seats && <span className="error-text">{errors.available_seats}</span>}
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="aircraft_type">Tipo de Aeronave *</label>
-              <select
-                id="aircraft_type"
-                name="aircraft_type"
-                value={formData.aircraft_type}
-                onChange={handleChange}
-                className={errors.aircraft_type ? 'error' : ''}
-              >
-                <option value="">Seleccione</option>
-                <option value="Airbus A320">Airbus A320</option>
-                <option value="Airbus A330">Airbus A330</option>
-                <option value="Boeing 737">Boeing 737</option>
-                <option value="Boeing 777">Boeing 777</option>
-                <option value="Embraer 190">Embraer 190</option>
-              </select>
-              {errors.aircraft_type && (
-                <span className="error-text">{errors.aircraft_type}</span>
-              )}
             </div>
           </div>
 
