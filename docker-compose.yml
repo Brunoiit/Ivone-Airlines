@@ -1,28 +1,33 @@
 services:
   postgres-db:
-    image: postgres-db:15
-    restart: always
+    image: postgres:15
     container_name: postgres-db
+    restart: always
     environment:
       POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin123
       POSTGRES_DB: airlinedb
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
 
   mongodb-db:
-    image: mongo:7
-    restart: always
+    image: mongo
     container_name: mongodb-db
-    volumes:
-      - mongo-data:/data/db
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: admin123
     ports:
       - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
 
   auth-service:
-    build: ./auth-service
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
     container_name: auth-service
     restart: always
     depends_on:
@@ -33,7 +38,8 @@ services:
       - "8001:8001"
 
   flights-service:
-    build: ./flights-service
+    build:
+      context: ./flights-service
     container_name: flights-service
     restart: always
     depends_on:
@@ -44,7 +50,8 @@ services:
       - "8002:8002"
 
   bookings-service:
-    build: ./bookings-service
+    build:
+      context: ./bookings-service
     container_name: bookings-service
     restart: always
     depends_on:
@@ -52,24 +59,26 @@ services:
       - flights-service
       - auth-service
     environment:
-      MONGODB_URI: mongodb://mongodb-db:27017/bookingsdb
+      MONGODB_URL: mongodb://admin:admin123@mongodb-db:27017/flight_bookings
     ports:
       - "8003:8003"
 
   payments-service:
-    build: ./payments-service
+    build:
+      context: ./payments-service
     container_name: payments-service
     restart: always
     depends_on:
       - postgres-db
-      - auth-service
+      - bookings-service
     environment:
       DATABASE_URL: postgresql://admin:admin123@postgres-db:5432/airlinedb
     ports:
       - "8004:8004"
 
   airline-front:
-    build: ./airline-front
+    build:
+      context: ./airline-front
     container_name: airline-front
     restart: always
     depends_on:
