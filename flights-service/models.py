@@ -1,9 +1,9 @@
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, Numeric, ForeignKey
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import sessionmaker, declarative_base
 from datetime import datetime
+import os
 
-DATABASE_URL = "postgresql://admin:admin123@localhost:5432/flight_system"
+DATABASE_URL = os.getenv("DATABASE_URL","postgresql://admin:admin123@postgres-db:5432/airlinedb")
 
 engine = create_engine(DATABASE_URL)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -18,7 +18,7 @@ class Flight(Base):
     destination = Column(String(50), nullable=False)
     departure_time = Column(DateTime, nullable=False)
     arrival_time = Column(DateTime, nullable=False)
-    price = Column(Integer, nullable=False)
+    price = Column(Numeric(10, 2), nullable=False)
     available_seats = Column(Integer, nullable=False)
     total_seats = Column(Integer, nullable=False)
     airline_id = Column(Integer, nullable=False)

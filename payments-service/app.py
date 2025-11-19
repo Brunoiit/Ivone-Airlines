@@ -8,7 +8,9 @@ from models import Payment, get_db
 import requests
 import uuid
 import uvicorn
+from models import Base, engine
 
+Base.metadata.create_all(bind=engine)
 app = FastAPI(title="Payments Service", version="1.0.0")
 
 app.add_middleware(

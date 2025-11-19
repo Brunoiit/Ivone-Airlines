@@ -1,11 +1,12 @@
-from sqlalchemy import create_engine, Column, Integer, String, DateTime, Numeric, ForeignKey
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy import create_engine, Column, Integer, String, DateTime, Numeric
+from sqlalchemy.orm import declarative_base, sessionmaker
 from datetime import datetime
+import os
 
-DATABASE_URL = "postgresql://admin:admin123@localhost:5432/flight_system"
+DATABASE_URL = os.getenv("DATABASE_URL","postgresql://admin:admin123@postgres-db:5432/airlinedb")
 
 engine = create_engine(DATABASE_URL)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

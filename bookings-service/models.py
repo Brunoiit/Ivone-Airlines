@@ -2,8 +2,9 @@ from pymongo import MongoClient
 from datetime import datetime
 import random
 import string
+import os
 
-MONGODB_URL = "mongodb://admin:admin123@localhost:27017/"
+MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://admin:admin123@localhost:27017/")
 client = MongoClient(MONGODB_URL)
 db = client["flight_bookings"]
 bookings_collection = db["bookings"]

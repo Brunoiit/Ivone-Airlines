@@ -156,8 +156,10 @@ def create_booking(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Error al actualizar asientos disponibles"
         )
-    
-    new_booking["id"] = str(result.inserted_id)
+    booking_id = str(result.inserted_id)
+
+    new_booking["id"] = booking_id
+    new_booking["booking_id"] = booking_id
     return new_booking
 
 @app.get("/bookings/{booking_id}", response_model=BookingResponse)
