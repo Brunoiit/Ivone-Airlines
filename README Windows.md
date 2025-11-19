@@ -24,8 +24,8 @@
 
 ### Paso 1: Preparar el Proyecto
 # Crear directorio del proyecto y que chille!
-mkdir Ivone Airlines
-cd Ivone Airlines
+mkdir Airline
+cd Airline
 
 ### Paso 2: Levantar las Bases de Datos con Docker
 # Iniciar PostgreSQL y MongoDB
