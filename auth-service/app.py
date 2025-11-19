@@ -9,6 +9,8 @@ from models import User, get_db
 import uvicorn
 
 app = FastAPI(title="Auth Service", version="1.0.0")
+from models import Base, engine
+Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,

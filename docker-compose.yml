@@ -9,8 +9,11 @@ services:
       POSTGRES_DB: airlinedb
     ports:
       - "5432:5432"
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d airlinedb"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   mongodb-db:
     image: mongo
@@ -31,11 +34,12 @@ services:
     container_name: auth-service
     restart: always
     depends_on:
-      - postgres-db
+      postgres-db:
+        condition: service_healthy
     environment:
       DATABASE_URL: postgresql://admin:admin123@postgres-db:5432/airlinedb
     ports:
-      - "8001:8001"
+    - "8001:8001"
 
   flights-service:
     build:
