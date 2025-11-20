@@ -61,7 +61,7 @@ const CreateFlight = () => {
 
       console.log("Payload enviado:", payload);
 
-      const response = await fetch('http://flights-service:8002/flights', {
+      const response = await fetch('http://localhost:8002/flights', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -71,8 +71,8 @@ const CreateFlight = () => {
       });
 
       const responseData = await response.json();
-      console.log("[v0] Response status:", response.status);
-      console.log("[v0] Response data:", responseData);
+      console.log("Response status:", response.status);
+      console.log("Response data:", responseData);
 
       if (response.ok) {
         setSuccessMessage('Vuelo creado exitosamente');
@@ -89,7 +89,7 @@ const CreateFlight = () => {
         setErrors({ submit: responseData.detail || responseData.message || 'Error al crear el vuelo' });
       }
     } catch (err) {
-      console.error("[v0] Error:", err);
+      console.error("Error:", err);
       setErrors({ submit: err.message });
     } finally {
       setIsSubmitting(false);
