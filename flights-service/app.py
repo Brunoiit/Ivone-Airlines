@@ -22,7 +22,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-AUTH_SERVICE_URL = "http://localhost:8001/auth/verify-token"
+AUTH_SERVICE_URL = "http://localhost:8001/auth/verify"
 
 # Modelos Pydantic
 class FlightCreate(BaseModel):
@@ -85,7 +85,7 @@ def root():
         "service": "Flights Service",
         "version": "1.0.0",
         "status": "running",
-        "endpoints": ["/flights", "/flights/search", "/auth/verify", "/flights/{flight_id}", "/flights/{flight_id}/seats"]
+        "endpoints": ["/flights", "/flights/search", "/flights/{flight_id}", "/flights/{flight_id}/seats"]
     }
 
 @app.post("/flights", response_model=FlightResponse, status_code=status.HTTP_201_CREATED)
