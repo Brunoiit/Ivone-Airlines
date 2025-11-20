@@ -13,11 +13,8 @@ const BookingDetails = () => {
     const fetchBooking = async () => {
       try {
         const token = localStorage.getItem('token');
-        
-        const response = await fetch(`http://localhost:8003/bookings/${id}`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+        const response = await fetch(`http://bookings-service:8003/bookings/flight/${id}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (response.ok) {

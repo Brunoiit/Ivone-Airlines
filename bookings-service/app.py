@@ -23,7 +23,8 @@ app.add_middleware(
 
 #AUTH_URL = "http://localhost:8001/auth/verify/"
 AUTH_URL = "http://auth-service:8001/auth/verify/"
-FLIGHTS_SERVICE_URL = "http://localhost:8002"
+#FLIGHTS_SERVICE_URL = "http://localhost:8002" 
+FLIGHTS_SERVICE_URL = "http://flights-service:8002"
 
 # Schemas de entrada
 class BookingCreate(BaseModel):
@@ -50,18 +51,31 @@ class BookingResponse(BaseModel):
 
 def verify_token(authorization: str = Header(None)):
     if not authorization:
-        raise HTTPException(status_code=401, detail="Token no proporcionado")
-
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token no proporcionado"
+        )
+    
     try:
-        token = authorization.replace("Bearer ", "")
-        response = requests.get(f"{AUTH_URL}/auth/verify", params={"token": token})
-
+        if not authorization.startswith("Bearer "):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Formato de autorización inválido"
+            )
+        token = authorization.split("Bearer ")[1]
+        response = requests.get(f"{AUTH_URL}", params={"token": token})
         if response.status_code != 200:
-            raise HTTPException(status_code=401, detail="Token inválido")
-
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Token inválido"
+            )
+        
         return response.json()
     except requests.RequestException:
-        raise HTTPException(status_code=503, detail="Servicio de autenticación no disponible")
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Servicio de autenticación no disponible"
+        )
 
 
 def generate_booking_code():
@@ -106,6 +120,21 @@ def create_booking(
     booking_doc = db.find_one({"_id": result.inserted_id})
 
     return booking_helper(booking_doc)
+
+
+@app.get("/bookings/flight/{flight_id}", response_model=List[BookingResponse])
+def get_bookings_by_flight(
+    flight_id: int,
+    user_data: dict = Depends(verify_token),
+    db = Depends(get_db)
+):
+    # Buscar reservas por id de vuelo y usuario autenticado
+    bookings = list(db.find({"flight_id": flight_id, "user_id": user_data.get("user_id")}))
+    
+    if not bookings:
+        raise HTTPException(status_code=404, detail="No se encontraron reservas para este vuelo")
+    
+    return [booking_helper(b) for b in bookings]
 
 
 @app.get("/bookings/{booking_id}", response_model=BookingResponse)

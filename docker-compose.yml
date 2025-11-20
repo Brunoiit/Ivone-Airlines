@@ -65,7 +65,7 @@ services:
       - flights-service
       - auth-service
     environment:
-      MONGODB_URL: mongodb://admin:admin123@mongodb-db:27017/flight_bookings
+      MONGODB_URL: mongodb://admin:admin123@mongodb-db:27017/flight_bookings?authSource=admin
     ports:
       - "8003:8003"
 

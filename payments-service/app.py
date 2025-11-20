@@ -21,7 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-AUTH_SERVICE_URL = "http://auth-service:8001/auth/verify/"
+AUTH_URL = "http://auth-service:8001/auth/verify/"
 
 # Modelos Pydantic
 class PaymentCreate(BaseModel):
@@ -59,9 +59,13 @@ def verify_token(authorization: str = Header(None)):
         )
     
     try:
-        token = authorization.replace("Bearer ", "")
-        response = requests.get(f"{AUTH_SERVICE_URL}/auth/verify", params={"token": token})
-        
+        if not authorization.startswith("Bearer "):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Formato de autorización inválido"
+            )
+        token = authorization.split("Bearer ")[1]
+        response = requests.get(f"{AUTH_URL}", params={"token": token})
         if response.status_code != 200:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
