@@ -13,18 +13,23 @@ const BookingDetails = () => {
     const fetchBooking = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await fetch(`http://bookings-service:8003/bookings/flight/${id}`, {
+        const response = await fetch(`http://localhost:8003/bookings/flight/${id}`, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (response.ok) {
           const data = await response.json();
-          setBooking(data);
+
+          if (data.length > 0) {
+            setBooking(data[0]); // ← tomamos la primera reserva del usuario para ese vuelo
+          } else {
+            setError("No se encontró ninguna reserva asociada a este vuelo");
+          }
         } else {
-          setError('No se pudo cargar la información de la reserva');
+          setError("No se pudo cargar la información de la reserva");
         }
       } catch (err) {
-        setError('Error al conectar con el servidor: ' + err.message);
+        setError("Error al conectar con el servidor: " + err.message);
       } finally {
         setIsLoading(false);
       }
