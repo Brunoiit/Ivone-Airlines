@@ -69,7 +69,6 @@ def verify_token(authorization: str = Header(None)):
             )
         token = authorization.split("Bearer ")[1]
         response = requests.get(f"{AUTH_URL}", params={"token": token})
-        print("Verifying token:", response.status_code, response.text)
         if response.status_code != 200:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
