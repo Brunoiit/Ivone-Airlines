@@ -101,8 +101,8 @@ def main():
     
     flight_data = {
         "flight_number": "AC100",
-        "origin": "BOG",
-        "destination": "MIA",
+        "origin": "BOGOTA",
+        "destination": "MIAMI",
         "departure_time": departure.isoformat(),
         "arrival_time": arrival.isoformat(),
         "price": 450000,

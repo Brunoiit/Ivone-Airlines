@@ -42,7 +42,7 @@ const SearchFlights = () => {
 
     try {
       const params = new URLSearchParams({
-        departure_city: searchParams.destination,
+        departure_city: searchParams.departure_city,
         arrival_city: searchParams.arrival_city,
         ...(searchParams.departure_date && { departure_date: searchParams.departure_date })
       });
@@ -70,13 +70,45 @@ const SearchFlights = () => {
     }
   };
 
-  const handleBookFlight = (flightId) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      alert('Debes iniciar sesión para reservar un vuelo');
+  const handleBookFlight = async (flightId) => {
+    const token = localStorage.getItem("token");
+
+    // Validación del token
+    if (!token || token === "null" || token === "undefined") {
+      alert("Debes iniciar sesión para reservar un vuelo");
       return;
     }
-    window.location.href = `/booking/${flightId}`;
+
+    try {
+      const response = await fetch("http://localhost:8003/bookings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`.trim(),
+        },
+        body: JSON.stringify({
+          flight_id: flightId,
+          passenger_name: "Pasajero Principal", 
+          passenger_document: "00000000",
+          seat_number: null
+        }),
+      });
+
+      if (!response.ok) {
+        const err = await response.json();
+        console.error("❌ ERROR BOOKING:", err);
+        alert("Error en la reserva: " + JSON.stringify(err.detail));
+        return;
+      }
+
+      const data = await response.json();
+      const bookingId = data.id;
+
+      window.location.href = `/booking/${bookingId}`;
+
+    } catch (err) {
+      alert("Error en la conexión con el servidor");
+    }
   };
 
   return ( 
