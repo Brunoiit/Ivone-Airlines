@@ -61,15 +61,15 @@ const CreateFlight = () => {
 
       console.log("Payload enviado:", payload);
 
-      const response = await fetch('http://localhost:8002/flights', {
+      const response = await fetch('http://localhost:8002/flights-service', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(payload)
+        body: JSON.stringify(payload)        
       });
-
+      console.log("Request sent with body:", JSON.stringify(payload))
       const responseData = await response.json();
       console.log("Response status:", response.status);
       console.log("Response data:", responseData);

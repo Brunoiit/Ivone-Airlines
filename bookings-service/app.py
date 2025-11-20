@@ -21,8 +21,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-#AUTH_URL = "http://localhost:8001/auth/verify-token"
-AUTH_URL = "http://auth-service:8001/auth/verify-token"
+AUTH_URL = "http://localhost:8001/auth/verify-token"
+#AUTH_URL = "http://auth-service:8001/auth/verify-token"
 FLIGHTS_SERVICE_URL = "http://localhost:8002"
 
 # Schemas de entrada
