@@ -21,7 +21,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-AUTH_SERVICE_URL = "http://localhost:8001"
+AUTH_SERVICE_URL = "http://auth-service:8001/auth/verify/"
 
 # Modelos Pydantic
 class PaymentCreate(BaseModel):
