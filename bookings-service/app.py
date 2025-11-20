@@ -53,7 +53,7 @@ def verify_token(authorization: str = Header(None)):
 
     try:
         token = authorization.replace("Bearer ", "")
-        response = requests.get(f"{AUTH_SERVICE_URL}/auth/verify", params={"token": token})
+        response = requests.get(f"{AUTH_URL}/auth/verify", params={"token": token})
 
         if response.status_code != 200:
             raise HTTPException(status_code=401, detail="Token inválido")
