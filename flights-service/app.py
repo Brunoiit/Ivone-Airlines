@@ -34,6 +34,7 @@ class FlightCreate(BaseModel):
     price: int
     total_seats: int
     airline_id: int
+    available_seats: int
 
 class FlightUpdate(BaseModel):
     price: Optional[int] = None
