@@ -63,7 +63,7 @@ def verify_token(authorization: str = Header(None)):
     
     try:
         token = authorization.replace("Bearer ", "")
-        response = requests.get(f"{AUTH_SERVICE_URL}/auth/verify", params={"token": token})
+        response = requests.get(f"{AUTH_SERVICE_URL}", params={"token": token})
         
         if response.status_code != 200:
             raise HTTPException(
@@ -84,7 +84,8 @@ def root():
     return {
         "service": "Flights Service",
         "version": "1.0.0",
-        "status": "running"
+        "status": "running",
+        "endpoints": ["/flights", "/flights/search", "/auth/verify", "/flights/{flight_id}", "/flights/{flight_id}/seats"]
     }
 
 @app.post("/flights", response_model=FlightResponse, status_code=status.HTTP_201_CREATED)
