@@ -59,9 +59,9 @@ const CreateFlight = () => {
         airline_id: airlineId
       };
 
-      console.log("[v0] Payload enviado:", payload);
+      console.log("Payload enviado:", payload);
 
-      const response = await fetch('http://localhost:8002/flights', {
+      const response = await fetch('http://flights-service:8002/flights', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
